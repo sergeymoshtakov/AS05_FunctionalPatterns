@@ -11,18 +11,26 @@ data Option a = None | Some a deriving (Show, Eq)
 -- Now implement Functor, Applicative and Monad
 instance Functor Option where
     fmap :: (a -> b) -> Option a -> Option b
-    fmap = todo
+    -- fmap _ None = None
+    -- fmap f (Some x) = Some (f x)
+    fmap f x = pure f <*> x
 
 instance Applicative Option where
     pure :: a -> Option a
-    pure = todo
+    pure = Some
 
     (<*>) :: Option (a -> b) -> Option a -> Option b
-    (<*>) = todo
+    -- Some f <*> Some x = Some (f x)
+    -- _ <*> _ = None
+    mf <*> mx = do
+      f <- mf
+      x <- mx
+      pure (f x)
 
 instance Monad Option where
   (>>=) :: Option a -> (a -> Option b) -> Option b
-  (>>=) = todo
+  None >>= _ = None
+  Some x >>= f = f x
 
 -- TODO: Check your definitions by running the tests:
 -- > cabal test option --test-show-details=direct
@@ -72,12 +80,17 @@ balanceByEmail' email =
 -- TODO: Implement the same functionality as above using `>>=` 
 -- instead of pattern matching:
 balanceByEmail'' :: String -> Option Double
-balanceByEmail'' email = todo
+balanceByEmail'' email =
+  userIdByEmail email >>= \uid ->
+  accountByUserId uid >>= \acc ->
+  pure(balance acc)
 
 -- TODO: Implement the same functionality as above using do-notation:
 balanceByEmail :: String -> Option Double
 balanceByEmail email = do
-  todo
+  uid <- userIdByEmail email
+  acc <- accountByUserId uid
+  pure(balance acc)
 
 main :: IO ()
 main = do
